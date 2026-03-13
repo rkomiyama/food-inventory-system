@@ -108,60 +108,40 @@ class _MainPageState extends State<MainPage> {
                         }
                         return null;
                       },
+                      onRowTap: (row) {
+                        if (row > 0) {
+                          var id = documents[row - 1].id;
+                          var data = documents[row - 1].data() as Map<String, dynamic>;
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute<void>(
+                              builder: (context) => const ItemScreen(),
+                            ),
+                          );
+                        }
+                      },
                       builder: (context, index) {
                         // Access data for a specific document
                         var id = documents[index.row].id;
                         var data = documents[index.row].data() as Map<String, dynamic>;
                         if (index.column == 0) {
                           return ShadTableCell(
-                            child: InkWell(
-                              onTap: () {
-                                print(id);
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute<void>(
-                                    builder: (context) => const ItemScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(id)
-                            )
+                            child: Text(id)
                           );
                         }
                         if (index.column == 1) {
                           return ShadTableCell(
-                            child: InkWell(
-                              onTap: () {
-                                print(data['count'].toString());
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute<void>(
-                                    builder: (context) => const ItemScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(data['count'].toString())
-                            )
+                            child: Text(data['count'].toString())
                           );
                         }
                         if (index.column == 2) {
                           return ShadTableCell(
-                            child: InkWell(
-                              onTap: () {
-                                print(formatCurrency.format(data['price']));
-                              },
-                              child: Text(formatCurrency.format(data['price']))
-                            )
+                            child: Text(formatCurrency.format(data['price']))
                           );
                         }
                         else {
                           return ShadTableCell(
-                            child: InkWell(
-                              onTap: () {
-                                print('Null');
-                              },
-                              child: Text('Null')
-                            )
+                            child: Text('Null')
                           );
                         }
                       },
