@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "46240197229",
+    "project_id": "food-inventory-system-firebase",
+    "storage_bucket": "food-inventory-system-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46240197229:android:899af00f55e8e966c2ad64",
+        "android_client_info": {
+          "package_name": "com.example.arcane_beamer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHjagTjZOFa3Ro_M1qttBoH2_afTF5VmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46240197229:android:f6f76a4f6d342bcdc2ad64",
+        "android_client_info": {
+          "package_name": "com.example.food_inventory_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHjagTjZOFa3Ro_M1qttBoH2_afTF5VmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46240197229:android:c49eccf11d0db62cc2ad64",
+        "android_client_info": {
+          "package_name": "com.example.foodinventorysystem.arcane_template"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHjagTjZOFa3Ro_M1qttBoH2_afTF5VmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46240197229:android:9f8c8ceb695938adc2ad64",
+        "android_client_info": {
+          "package_name": "com.example.foodinventorysystem2.arcane_template"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHjagTjZOFa3Ro_M1qttBoH2_afTF5VmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
