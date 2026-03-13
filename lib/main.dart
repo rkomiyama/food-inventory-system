@@ -115,7 +115,11 @@ class _MainPageState extends State<MainPage> {
                           Navigator.push(
                             context,
                             CupertinoPageRoute<void>(
-                              builder: (context) => const ItemScreen(),
+                              builder: (context) => ItemScreen(
+                                itemName: id,
+                                count: data['count'],
+                                price: formatCurrency.format(data['price']),
+                              ),
                             ),
                           );
                         }
