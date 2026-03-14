@@ -4,12 +4,14 @@ import 'package:flutter/cupertino.dart';
 
 class ItemScreen extends StatefulWidget {
   final String itemName;
+  final String lastOrderedDate;
   final int count;
   final String price;
 
   const ItemScreen({
     super.key,
     required this.itemName,
+    required this.lastOrderedDate,
     required this.count,
     required this.price,
   });
@@ -20,7 +22,7 @@ class ItemScreen extends StatefulWidget {
 
 class _ItemScreenState extends State<ItemScreen> {
   final headings = [
-    "Last ordered date",
+    "Order date",
     "Quantity ordered",
     "Total order price",
   ];
@@ -46,6 +48,7 @@ class _ItemScreenState extends State<ItemScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text('Last ordered: ' + widget.lastOrderedDate),
                 Text('Count: ' + widget.count.toString()),
                 Text('Price: ' + widget.price),
               ]
@@ -74,6 +77,11 @@ class _ItemScreenState extends State<ItemScreen> {
                 );
               },
               builder: (context, index) {
+                if (index == 0) {
+                  return ShadTableCell(
+                    child: Text(widget.lastOrderedDate)
+                  );
+                }
                 return ShadTableCell(
                   child: Text('Null')
                 );
@@ -82,9 +90,21 @@ class _ItemScreenState extends State<ItemScreen> {
           )
         ]
       ),
-      floatingActionButton: ShadIconButton(
-        onPressed: () => print('Add'),
-        icon: const Icon(LucideIcons.plus),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          ShadIconButton(
+            onPressed: () => print('Add'),
+            icon: const Icon(LucideIcons.plus),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          ShadIconButton(
+            onPressed: () => print('Minus'),
+            icon: const Icon(LucideIcons.minus),
+          ),
+        ]
       ),
     );
   }

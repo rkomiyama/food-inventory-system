@@ -18,6 +18,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
   runApp(const MyApp());
 }
 
@@ -59,105 +60,103 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final headings = [
-    "Item name",
-    "Quantity",
-    "Price",
-    "Last date ordered"
-  ];
+  final headings = ["Item name", "Quantity", "Price", "Last ordered date"];
   final formatCurrency = NumberFormat.simpleCurrency(locale: 'en_US');
+
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _inventoryStream;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _inventoryStream = FirebaseFirestore.instance.collection('inventory').snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Align(
+        title: const Align(
           alignment: Alignment.centerLeft,
           child: Text('Food Inventory System'),
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              child: FutureBuilder<QuerySnapshot>(
-                future: FirebaseFirestore.instance.collection('inventory').get(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator(); // Show a loading indicator
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}'); // Show an error message
-                  } else if (snapshot.hasData) {
-                    // Data has been successfully received, access via snapshot.data!.docs
-                    final List<DocumentSnapshot> documents = snapshot.data!.docs;
-                    return ShadTable(
-                      columnCount: headings.length,
-                      rowCount: documents.length,
-                      header: (context, column) {
-                        return ShadTableCell.header(
-                          child: Text(headings[column]),
-                        );
-                      },
-                      columnSpanExtent: (index) {
-                        if (index == 0) return const FixedTableSpanExtent(250);
-                        if (index == headings.length - 1) {
-                          return const MaxTableSpanExtent(
-                            FixedTableSpanExtent(120),
-                            RemainingTableSpanExtent(),
-                          );
-                        }
-                        return null;
-                      },
-                      onRowTap: (row) {
-                        if (row > 0) {
-                          var id = documents[row - 1].id;
-                          var data = documents[row - 1].data() as Map<String, dynamic>;
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute<void>(
-                              builder: (context) => ItemScreen(
-                                itemName: id,
-                                count: data['count'],
-                                price: formatCurrency.format(data['price']),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      builder: (context, index) {
-                        // Access data for a specific document
-                        var id = documents[index.row].id;
-                        var data = documents[index.row].data() as Map<String, dynamic>;
-                        if (index.column == 0) {
-                          return ShadTableCell(
-                            child: Text(id)
-                          );
-                        }
-                        if (index.column == 1) {
-                          return ShadTableCell(
-                            child: Text(data['count'].toString())
-                          );
-                        }
-                        if (index.column == 2) {
-                          return ShadTableCell(
-                            child: Text(formatCurrency.format(data['price']))
-                          );
-                        }
-                        else {
-                          return ShadTableCell(
-                            child: Text('Null')
-                          );
-                        }
-                      },
-                    );
-                  } else {
-                    return Text('No data found');
-                  }
-                },
-              )
-            )
-          ),
-        ]
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _inventoryStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final documents = snapshot.data!.docs;
+
+          if (documents.isEmpty) {
+            return const Center(child: Text('inventory collection is empty'));
+          }
+
+          return ShadTable(
+            columnCount: headings.length,
+            rowCount: documents.length,
+            columnSpanExtent: (index) {
+              if (index == 0) return const FixedTableSpanExtent(250);
+              if (index == headings.length - 1) {
+                return const MaxTableSpanExtent(
+                  FixedTableSpanExtent(120),
+                  RemainingTableSpanExtent(),
+                );
+              }
+              return null;
+            },
+            onRowTap: (row) {
+              if (row > 0) {
+                var id = documents[row - 1].id;
+                var data = documents[row - 1].data() as Map<String, dynamic>;
+                final ts = data['lastOrderedDate'];
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute<void>(
+                    builder: (context) => ItemScreen(
+                      itemName: id,
+                      count: data['count'],
+                      price: formatCurrency.format(data['price']),
+                      lastOrderedDate: DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate()),
+                    ),
+                  ),
+                );
+              }
+            },
+            header: (context, column) => ShadTableCell.header(
+              child: Text(headings[column]),
+            ),
+            builder: (context, index) {
+              final doc = documents[index.row];
+              final data = doc.data();
+
+              if (index.column == 0) {
+                return ShadTableCell(child: Text(doc.id));
+              }
+              if (index.column == 1) {
+                return ShadTableCell(child: Text('${data['count']}'));
+              }
+              if (index.column == 2) {
+                return ShadTableCell(
+                  child: Text(formatCurrency.format(data['price'])),
+                );
+              }
+              if (index.column == 3) {
+                final ts = data['lastOrderedDate'];
+                return ShadTableCell(
+                  child: Text(DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate())),
+                );
+              }
+              return const ShadTableCell(child: Text(''));
+            },
+          );
+        },
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
