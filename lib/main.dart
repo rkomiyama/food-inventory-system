@@ -203,6 +203,7 @@ class _MainPageState extends State<MainPage> {
                     child: Text('Add item'),
                     onPressed: () {
                       addInventoryItem(itemNameController.text);
+                      Navigator.of(context).pop(true);
                     }
                   )],
                   child: Container(
