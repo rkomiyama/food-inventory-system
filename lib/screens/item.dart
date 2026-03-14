@@ -8,7 +8,6 @@ class ItemScreen extends StatefulWidget {
   final String lastOrderedDate;
   final int count;
   final String price;
-  final Function(String, Timestamp) onUpdate;
 
   const ItemScreen({
     super.key,
@@ -16,7 +15,6 @@ class ItemScreen extends StatefulWidget {
     required this.lastOrderedDate,
     required this.count,
     required this.price,
-    required this.onUpdate,
   });
 
   @override
@@ -69,7 +67,6 @@ class _ItemScreenState extends State<ItemScreen> {
             'orderDate': now,
           })
           .timeout(const Duration(seconds: 10));
-      widget.onUpdate(widget.itemName, now);
       setState(() {
         _lastOrderedDate = DateFormat('MM/dd/yyyy, hh:mm a').format(now.toDate());
       });

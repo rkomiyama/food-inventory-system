@@ -90,18 +90,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  Future<void> updateItemOrder(String id, Timestamp newDate) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('inventory')
-          .doc(id) // Reference the specific document
-          .update({'lastOrderedDate': newDate}); // Update the field
-      print("Order date updated successfully!");
-    } catch (e) {
-      print("Error updating data: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,7 +148,6 @@ class _MainPageState extends State<MainPage> {
                       count: data['count'] ?? 0,
                       price: formatCurrency.format(data['price'] ?? 0),
                       lastOrderedDate: formattedDate,
-                      onUpdate: updateItemOrder,
                     ),
                   ),
                 );
