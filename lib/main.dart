@@ -61,8 +61,11 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final headings = ["Item name", "Quantity", "Price", "Last ordered date"];
+  final newItemAttr = [
+    (title: 'Item name', value: ''),
+  ];
   final formatCurrency = NumberFormat.simpleCurrency(locale: 'en_US');
-
+  final itemNameController = TextEditingController();
   late final Stream<QuerySnapshot<Map<String, dynamic>>> _inventoryStream;
 
   @override
@@ -70,6 +73,24 @@ class _MainPageState extends State<MainPage> {
     super.initState();
 
     _inventoryStream = FirebaseFirestore.instance.collection('inventory').snapshots();
+  }
+
+  void addInventoryItem(itemName) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('inventory')
+          .doc(itemName)
+          .set({
+            'count': 0,
+            'price': 0,
+            'lastOrderedDate': '',
+          })
+          .timeout(const Duration(seconds: 10));
+      print('WRITE succeeded');
+    } catch (e, st) {
+      print('WRITE failed: $e');
+      print(st);
+    }
   }
 
   @override
@@ -116,6 +137,12 @@ class _MainPageState extends State<MainPage> {
                 var id = documents[row - 1].id;
                 var data = documents[row - 1].data() as Map<String, dynamic>;
                 final ts = data['lastOrderedDate'];
+                var formattedDate;
+                if (ts != Null && ts != '') {
+                  formattedDate = DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate());
+                } else {
+                  formattedDate = 'No orders made';
+                }
                 Navigator.push(
                   context,
                   CupertinoPageRoute<void>(
@@ -123,7 +150,7 @@ class _MainPageState extends State<MainPage> {
                       itemName: id,
                       count: data['count'],
                       price: formatCurrency.format(data['price']),
-                      lastOrderedDate: DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate()),
+                      lastOrderedDate: formattedDate,
                     ),
                   ),
                 );
@@ -149,8 +176,13 @@ class _MainPageState extends State<MainPage> {
               }
               if (index.column == 3) {
                 final ts = data['lastOrderedDate'];
-                return ShadTableCell(
-                  child: Text(DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate())),
+                if (ts != Null && ts != '') {
+                  return ShadTableCell(
+                    child: Text(DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate())),
+                  );
+                }
+                else return ShadTableCell(
+                  child: Text('No orders made'),
                 );
               }
               return const ShadTableCell(child: Text(''));
@@ -162,7 +194,47 @@ class _MainPageState extends State<MainPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           ShadIconButton(
-            onPressed: () => print('Add'),
+            onPressed: () {
+              showShadDialog(
+                context: context,
+                builder: (context) => ShadDialog(
+                  title: const Text('Add inventory item'),
+                  actions: [ShadButton(
+                    child: Text('Add item'),
+                    onPressed: () {
+                      addInventoryItem(itemNameController.text);
+                    }
+                  )],
+                  child: Container(
+                    width: 375,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      spacing: 16,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Item name',
+                                textAlign: TextAlign.end,
+                                // style: theme.textTheme.small,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 3,
+                              child: ShadInput(controller: itemNameController),
+                            ),
+                          ]
+                        )
+                      ],
+                    ),
+                  )
+                )
+              );
+            },
             icon: const Icon(LucideIcons.plus),
           ),
           SizedBox(
