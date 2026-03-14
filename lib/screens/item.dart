@@ -30,8 +30,10 @@ class _ItemScreenState extends State<ItemScreen> {
 
   final orderQuantityController = TextEditingController();
   final orderPriceController = TextEditingController();
+  final itemNameController = TextEditingController();
   late final Stream<QuerySnapshot<Map<String, dynamic>>> _itemOrdersStream;
   String _lastOrderedDate = '';
+  final formatCurrency = NumberFormat.simpleCurrency(locale: 'en_US');
 
   @override
   void initState() {
@@ -65,6 +67,8 @@ class _ItemScreenState extends State<ItemScreen> {
           .collection('orders')
           .add({
             'orderDate': now,
+            'orderQuantity': double.tryParse(orderQuantityController.text),
+            'orderPrice': double.tryParse(orderPriceController.text),
           })
           .timeout(const Duration(seconds: 10));
       setState(() {
@@ -163,6 +167,50 @@ class _ItemScreenState extends State<ItemScreen> {
                     }
                     return null;
                   },
+                  onRowTap: (row) {
+                    if (row > 0) {
+                      var data = documents[row - 1].data() as Map<String, dynamic>;
+                      showShadDialog(
+                        context: context,
+                        builder: (context) => ShadDialog(
+                          title: const Text('Add inventory item'),
+                          actions: [ShadButton(
+                            child: Text('Add item'),
+                            onPressed: () {
+                              // addInventoryItem(itemNameController.text);
+                              Navigator.of(context).pop(true);
+                            }
+                          )],
+                          child: Container(
+                            width: 375,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              spacing: 16,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Item name',
+                                        textAlign: TextAlign.end,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      flex: 3,
+                                      child: ShadInput(controller: itemNameController),
+                                    ),
+                                  ]
+                                )
+                              ],
+                            ),
+                          )
+                        )
+                      );
+                    }
+                  },
                   header: (context, column) {
                     return ShadTableCell.header(
                       child: Text(headings[column]),
@@ -175,6 +223,16 @@ class _ItemScreenState extends State<ItemScreen> {
                     if (index.column == 0) {
                       return ShadTableCell(
                         child: Text(DateFormat('MM/dd/yyyy, hh:mm a').format(data['orderDate'].toDate()))
+                      );
+                    }
+                    if (index.column == 1) {
+                      return ShadTableCell(
+                        child: Text(data['orderQuantity'].toString())
+                      );
+                    }
+                    if (index.column == 2) {
+                      return ShadTableCell(
+                        child: Text(formatCurrency.format(data['orderPrice'] ?? 0))
                       );
                     }
                     else {
