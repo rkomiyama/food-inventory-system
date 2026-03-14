@@ -61,9 +61,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final headings = ["Item name", "Quantity", "Price", "Last ordered date"];
-  final newItemAttr = [
-    (title: 'Item name', value: ''),
-  ];
   final formatCurrency = NumberFormat.simpleCurrency(locale: 'en_US');
   final itemNameController = TextEditingController();
   late final Stream<QuerySnapshot<Map<String, dynamic>>> _inventoryStream;
@@ -90,6 +87,18 @@ class _MainPageState extends State<MainPage> {
     } catch (e, st) {
       print('WRITE failed: $e');
       print(st);
+    }
+  }
+
+  Future<void> updateItemOrder(String id, Timestamp newDate) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('inventory')
+          .doc(id) // Reference the specific document
+          .update({'lastOrderedDate': newDate}); // Update the field
+      print("Order date updated successfully!");
+    } catch (e) {
+      print("Error updating data: $e");
     }
   }
 
@@ -138,7 +147,7 @@ class _MainPageState extends State<MainPage> {
                 var data = documents[row - 1].data() as Map<String, dynamic>;
                 final ts = data['lastOrderedDate'];
                 var formattedDate;
-                if (ts != Null && ts != '') {
+                if (ts != null && ts != '') {
                   formattedDate = DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate());
                 } else {
                   formattedDate = 'No orders made';
@@ -148,9 +157,10 @@ class _MainPageState extends State<MainPage> {
                   CupertinoPageRoute<void>(
                     builder: (context) => ItemScreen(
                       itemName: id,
-                      count: data['count'],
-                      price: formatCurrency.format(data['price']),
+                      count: data['count'] ?? 0,
+                      price: formatCurrency.format(data['price'] ?? 0),
                       lastOrderedDate: formattedDate,
+                      onUpdate: updateItemOrder,
                     ),
                   ),
                 );
@@ -167,16 +177,16 @@ class _MainPageState extends State<MainPage> {
                 return ShadTableCell(child: Text(doc.id));
               }
               if (index.column == 1) {
-                return ShadTableCell(child: Text('${data['count']}'));
+                return ShadTableCell(child: Text('${data['count'] ?? 0}'));
               }
               if (index.column == 2) {
                 return ShadTableCell(
-                  child: Text(formatCurrency.format(data['price'])),
+                  child: Text(formatCurrency.format(data['price'] ?? 0)),
                 );
               }
               if (index.column == 3) {
                 final ts = data['lastOrderedDate'];
-                if (ts != Null && ts != '') {
+                if (ts != null && ts != '') {
                   return ShadTableCell(
                     child: Text(DateFormat('MM/dd/yyyy, hh:mm a').format(ts.toDate())),
                   );
@@ -220,7 +230,6 @@ class _MainPageState extends State<MainPage> {
                               child: Text(
                                 'Item name',
                                 textAlign: TextAlign.end,
-                                // style: theme.textTheme.small,
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -238,13 +247,9 @@ class _MainPageState extends State<MainPage> {
             },
             icon: const Icon(LucideIcons.plus),
           ),
-          SizedBox(
-            width: 10,
-          ),
-          ShadIconButton(
-            onPressed: () => print('Minus'),
-            icon: const Icon(LucideIcons.minus),
-          ),
+          // SizedBox(
+          //   width: 10,
+          // ),
         ]
       ),
     );
